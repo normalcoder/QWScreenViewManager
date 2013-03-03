@@ -96,6 +96,22 @@ static UIScrollView * getScrollView(UIView * view) {
     
     [_views addObject:view];
     scrollView.contentSize = scrollView.bounds.size;
+    
+    [view addObserver:self forKeyPath:@"frame" options:NSKeyValueObservingOptionNew context:nil];
+}
+
+#pragma mark -
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
+    if ([object isKindOfClass:[UIView class]]) {
+        if ([keyPath isEqual:@"frame"]) {
+            UIView * view = (UIView *)object;
+            CGRect newFrame = [[change objectForKey:NSKeyValueChangeNewKey] CGRectValue];
+            UIScrollView * scrollView = getScrollView(view);
+            
+            scrollView.frame = (CGRect){0, 0, newFrame.size};
+        }
+    }
 }
 
 #pragma mark -
