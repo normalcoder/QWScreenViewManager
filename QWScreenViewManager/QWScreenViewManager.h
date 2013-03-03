@@ -4,4 +4,6 @@
 
 + (instancetype)sharedInstance;
 
+- (void)addView:(UIView *)view;
+
 @end
