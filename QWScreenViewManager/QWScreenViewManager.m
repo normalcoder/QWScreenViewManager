@@ -1,5 +1,5 @@
 #import "QWScreenViewManager.h"
-#import "QWWeakMutableArray.h"
+#import <QWWeakMutableArray.h>
 
 
 @interface QWSizeSet : NSObject
