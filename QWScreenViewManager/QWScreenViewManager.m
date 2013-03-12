@@ -63,6 +63,10 @@ static QWSizeSet * (^getSizeSet)(NSDictionary *, UIView *) = ^(NSDictionary * si
     _sizeSets[@(((unsigned int)view))] = newSizeSet();
 }
 
+- (BOOL)isNormalSetForView:(UIView *)view {
+    return _sizeSets[@(((unsigned int)view))] != nil;
+}
+
 - (CGSize)normalSizeForView:(UIView *)view {
     QWSizeSet * sizeSet = _sizeSets[@(((unsigned int)view))];
     return sizeSet.normalSize;
@@ -72,6 +76,7 @@ static UIScrollView * getScrollView(UIView * view) {
     BOOL (^isMainScrollView)(UIScrollView *) = ^BOOL (UIScrollView * scrollView){
         return
         [scrollView isKindOfClass:[UIScrollView class]]
+        && ![scrollView isKindOfClass:[UITableView class]]
         && scrollView.bounds.size.width == view.bounds.size.width;
     };
     
@@ -84,7 +89,7 @@ static UIScrollView * getScrollView(UIView * view) {
         return (UIScrollView *)nil;
     };
     
-    if ([view isKindOfClass:[UIScrollView class]]) {
+    if ([view isKindOfClass:[UIScrollView class]] && ![view isKindOfClass:[UITableView class]]) {
         return (UIScrollView *)view;
     } else {
         return scrollSubview();
@@ -95,7 +100,7 @@ static UIScrollView * getScrollView(UIView * view) {
     UIScrollView * scrollView = getScrollView(view);
     
     [_views addObject:view];
-    scrollView.contentSize = scrollView.bounds.size;
+    scrollView.contentSize = scrollView.frame.size;
     
     [view addObserver:self forKeyPath:@"frame" options:NSKeyValueObservingOptionNew context:nil];
 }
@@ -109,7 +114,9 @@ static UIScrollView * getScrollView(UIView * view) {
             CGRect newFrame = [[change objectForKey:NSKeyValueChangeNewKey] CGRectValue];
             UIScrollView * scrollView = getScrollView(view);
             
-            scrollView.frame = (CGRect){0, 0, newFrame.size};
+            if (view != scrollView) {
+                scrollView.frame = (CGRect){0, 0, newFrame.size};
+            }
         }
     }
 }
@@ -190,7 +197,6 @@ static BOOL doesViewContainView(UIView * rootView, UIView * viewToFind) {
     UIWindow * window = [[UIApplication sharedApplication] windows][0];
     UIView * screenView = [self findViewInsideView:window];
     
-    
     CGRect (^newScreenViewFrame)() = ^{
         CGSize normalSize = [self normalSizeForView:screenView];
         
@@ -217,6 +223,9 @@ static BOOL doesViewContainView(UIView * rootView, UIView * viewToFind) {
         [UIView commitAnimations];
     };
     
+    if (![self isNormalSetForView:screenView]) {
+        [self setNormalSize:screenView.bounds.size forView:screenView];
+    }
     updateScreenViewFrame();
 }
 
