@@ -105,6 +105,10 @@ static UIScrollView * getScrollView(UIView * view) {
     [view addObserver:self forKeyPath:@"frame" options:NSKeyValueObservingOptionNew context:nil];
 }
 
+- (void)removeView:(UIView *)view {
+    [view removeObserver:self forKeyPath:@"frame"];
+}
+
 #pragma mark -
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
